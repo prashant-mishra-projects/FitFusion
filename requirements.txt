@@ -9,3 +9,4 @@ pillow
 pandas
 requests==2.32.3
 opencv
+opencv-python-headless
