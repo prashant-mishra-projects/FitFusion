@@ -1,3 +1,5 @@
 cmake
 libgtk2.0-dev
 pkg-config
+libgl1-mesa-glx
+libgl1
