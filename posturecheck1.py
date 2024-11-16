@@ -2,7 +2,6 @@ import streamlit as st
 import cv2
 import mediapipe as mp
 import numpy as np
-import streamlit.components.v1 as components
 
 # Initialize MediaPipe Pose
 mp_pose = mp.solutions.pose
@@ -151,26 +150,6 @@ def app():
 
     stframe = st.empty()
 
-    # Embed WebRTC video stream into Streamlit using HTML
-    html_code = """
-    <html>
-    <body>
-        <h2>WebRTC Webcam Stream</h2>
-        <video id="webcam" width="640" height="480" autoplay></video>
-        <script>
-            var video = document.getElementById('webcam');
-            navigator.mediaDevices.getUserMedia({ video: true })
-                .then(function(stream) {
-                    video.srcObject = stream;
-                }).catch(function(err) {
-                    console.log('Error accessing webcam: ', err);
-                });
-        </script>
-    </body>
-    </html>
-    """
-    components.html(html_code, height=500)
-
     cap = cv2.VideoCapture(0)
 
     counter = 0
@@ -180,27 +159,32 @@ def app():
         while cap.isOpened():
             ret, frame = cap.read()
             if not ret:
+                st.warning("Unable to access the camera.")
                 break
 
+            frame = cv2.flip(frame, 1)
             height, width, _ = frame.shape
-            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            results = pose.process(frame_rgb)
+            rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            results = pose.process(rgb_frame)
 
             if results.pose_landmarks:
-                # Draw landmarks
                 mp_drawing.draw_landmarks(frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
+                landmarks = results.pose_landmarks.landmark
 
                 if exercise == "Bicep Curls":
-                    analyze_bicep_curl(results.pose_landmarks.landmark, frame, width, height)
+                    analyze_bicep_curl(landmarks, frame, width, height)
                 elif exercise == "Squats":
-                    analyze_squat(results.pose_landmarks.landmark, frame, width, height)
+                    analyze_squat(landmarks, frame, width, height)
                 elif exercise == "Tricep Extensions":
-                    analyze_tricep_extension(results.pose_landmarks.landmark, frame, width, height)
+                    analyze_tricep_extension(landmarks, frame, width, height)
                 elif exercise == "Shoulder Press":
-                    counter, stage = analyze_shoulder_press(results.pose_landmarks.landmark, frame, width, height, counter, stage)
+                    counter, stage = analyze_shoulder_press(landmarks, frame, width, height, counter, stage)
 
-            # Display the frame
-            stframe.image(frame, channels="BGR", use_column_width=True)
+            stframe.image(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB), channels="RGB")
 
-if __name__ == "__main__":
-    app()
+            if cv2.waitKey(10) & 0xFF == ord('q'):
+                break
+
+    cap.release()
+    cv2.destroyAllWindows()
+
