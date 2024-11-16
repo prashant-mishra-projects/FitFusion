@@ -7,4 +7,4 @@ firebase_admin
 plotly
 pillow
 pandas
-request
+request==2.32.3
