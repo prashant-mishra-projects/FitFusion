@@ -150,7 +150,7 @@ def app():
 
     stframe = st.empty()
 
-    cap = cv2.VideoCapture(2)
+    cap = cv2.VideoCapture(0)
 
     counter = 0
     stage = None
