@@ -1,0 +1,10 @@
+streamlit
+streamlit-option-menu
+opencv-python
+numpy
+mediapipe=0.10.0
+firebase_admin
+plotly
+pillow
+pandas
+request
